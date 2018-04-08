@@ -104,5 +104,5 @@ ENV/
 .vscode
 
 # Data directory
-data/**
-!data/.gitkeep
+# data/**
+# !data/.gitkeep
