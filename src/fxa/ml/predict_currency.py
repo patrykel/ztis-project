@@ -11,6 +11,26 @@ from sklearn.svm import SVC
 from sklearn.naive_bayes import BernoulliNB
 from sklearn.tree import DecisionTreeClassifier
 
+# My new classifiers
+
+# PROPOSED...
+from sklearn.gaussian_process import GaussianProcessClassifier
+from sklearn.naive_bayes import GaussianNB
+from sklearn.discriminant_analysis import QuadraticDiscriminantAnalysis
+from sklearn.neural_network import MLPClassifier
+
+# NEW FROM SCIKIT LEARN...
+from sklearn.svm import LinearSVC
+# from sklearn.naive_bayes import MultinomialNB # input must be non-negative
+from sklearn.linear_model import SGDClassifier
+
+from sklearn.linear_model import LassoCV # Can't handle mix of multiclass and continuous
+from sklearn.linear_model import Ridge # Can't handle mix of multiclass and continuous
+from sklearn.linear_model import BayesianRidge # Can't handle mix of multiclass and continuous
+from sklearn.linear_model import PassiveAggressiveClassifier #
+
+# My time measurement
+import time
 
 PREDICTION_WINDOW = 7  # in days
 
@@ -48,10 +68,14 @@ def __note_has_currency_rate(note, currency_repository):
 
 
 def test_model(notes, predictions, clf):
+    print("\tGetting note vectors...")
     note_vectors = [note_to_vec(note) for note in notes]
+    print("\tSplitting train test...")
     X_train, X_test, y_train, y_test = train_test_split(
         note_vectors, predictions, test_size=0.2)
+    print("\tFitting...")
     clf.fit(X_train, y_train)
+    print("\tPredicting...")
     generated_predictions = clf.predict(X_test)
     return accuracy_score(y_test, generated_predictions)
 
@@ -76,10 +100,23 @@ def run_ml_tests(notes, currency_repository):
         ('SVM rbf', SVC()),
         ('AdaBoost', AdaBoostClassifier()),
         ('Bernoulli NB', BernoulliNB()),
-        ('Decision Tree', DecisionTreeClassifier())
+        ('Decision Tree', DecisionTreeClassifier()),
+
+        ('GaussianNB', GaussianNB()),
+        ('QuadraticDiscriminantAnalysis', QuadraticDiscriminantAnalysis()),
+        ('MLPClassifier', MLPClassifier()),
+
+        ('LinearSVC', LinearSVC()),
+        ('SGDClassifier', SGDClassifier()),
+        ('PassiveAggressiveClassifier', PassiveAggressiveClassifier()),
     ]
     for classifier in CLASSIFIERS:
         print(classifier[0])
+
+        start = time.time()
         score = test_model(notes, predictions, classifier[1])
+        end = time.time()
+        print("Elapsed time: {}\n".format(end - start))
+
         scores[classifier[0]] = score
     pprint(sorted(scores.items(), key=operator.itemgetter(1), reverse=True))
